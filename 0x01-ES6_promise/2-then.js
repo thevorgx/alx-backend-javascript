@@ -8,6 +8,9 @@ function handleResponseFromAPI(promise) {
   }).then((response) => {
     console.log('Got a response from the API');
     return response;
+  }).catch((error) => {
+    console.error(error);
+    throw error;
   });
   return myprom;
 }
