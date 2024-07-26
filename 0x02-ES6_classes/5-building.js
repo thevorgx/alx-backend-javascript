@@ -3,6 +3,7 @@ export default class Building {
     if (new.target === Building) {
       this._sqft = sqft;
     } else {
+      this._sqft = sqft;
       this.evacuationWarningMessage();
     }
   }
