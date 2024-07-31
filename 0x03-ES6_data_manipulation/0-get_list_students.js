@@ -1,4 +1,4 @@
-export default function getListStudentIds() {
+export default function getListStudents() {
   const p1 = {
     id: 1,
     firstName: 'Guillaume',
