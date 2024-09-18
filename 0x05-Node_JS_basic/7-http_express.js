@@ -5,26 +5,19 @@ const app = express();
 const port = 1245;
 const hostname = '127.0.0.1';
 
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.send('Hello Holberton School!');
 });
 
-app.get('/students', (req, res) => {
-  const databasePath = process.argv[2];
-
-  res.write('This is the list of our students');
-
-  if (!databasePath) {
-    res.end('Error: No database file path provided');
-  } else {
-    countStudents(databasePath)
-      .then(() => {
-        res.end();
-      })
-      .catch((err) => {
-        res.end(`${err.message}\n`);
-      });
-  }
+app.get('/', (request, response) => {
+  response.send('Hello Holberton School!');
+});
+app.get('/students', (request, response) => {
+  countStudents(process.argv[2].toString()).then((output) => {
+    response.send(['This is the list of our students', output].join('\n'));
+  }).catch(() => {
+    response.send('This is the list of our students\nCannot load the database');
+  });
 });
 
 app.listen(port, hostname, () => {
