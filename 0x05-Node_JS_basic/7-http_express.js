@@ -1,9 +1,9 @@
 const express = require('express');
+const fs = require('fs');
 
 const app = express();
 const port = 1245;
 const hostname = '127.0.0.1';
-const fs = require('fs');
 
 const countStudents = (path) => new Promise((resolve, reject) => {
   fs.readFile(path, 'utf8', (err, data) => {
@@ -25,33 +25,39 @@ const countStudents = (path) => new Promise((resolve, reject) => {
       fields[field].push(firstname);
     });
 
-    console.log(`Number of students: ${students.length}`);
+    let output = `Number of students: ${students.length}\n`;
     for (const [field, names] of Object.entries(fields)) {
-      console.log(`Number of students in ${field}: ${names.length}. List: ${names.join(', ')}`);
+      output += `Number of students in ${field}: ${names.length}. List: ${names.join(', ')}\n`;
     }
 
-    resolve();
+    resolve(output);
   });
 });
-
-module.exports = countStudents;
 
 app.get('/', (_, res) => {
   res.send('Hello Holberton School!');
 });
 
-app.get('/', (request, response) => {
-  response.send('Hello Holberton School!');
-});
-app.get('/students', (request, response) => {
-  countStudents(process.argv[2].toString()).then((output) => {
-    response.send(['This is the list of our students', output].join('\n'));
-  }).catch(() => {
-    response.send('This is the list of our students\nCannot load the database');
-  });
+app.get('/students', (req, res) => {
+  const databasePath = process.argv[2];
+
+  res.write('This is the list of our students');
+
+  if (!databasePath) {
+    res.end('Error: No database file path provided');
+  } else {
+    countStudents(databasePath)
+      .then((output) => {
+        res.end(output);
+      })
+      .catch(() => {
+        res.end('Cannot load the database');
+      });
+  }
 });
 
 app.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
 });
 
 module.exports = app;
