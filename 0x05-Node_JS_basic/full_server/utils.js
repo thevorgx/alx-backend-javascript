@@ -1,32 +1,26 @@
-const fs = require('fs').promises;
+const { readFile } = require('fs');
 
-/**
- * A function that accepts a path to a csv file that contains list of students
- * It reads the file asynchronously and returns a promise.
- *
- * @param {string} path - path to csv file
- */
-function readDatabase(path) {
+module.exports = function readDatabase(filePath) {
+  const students = {};
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8')
-      .then((data) => {
-        const students = data
-          .split('\n')
-          .filter((student) => student.length > 0)
-          .map((student) => student.split(','));
-
-        students.shift();
-        const stats = {};
-        students.forEach((student) => {
-          if (!stats[student[3]]) stats[student[3]] = [];
-          stats[student[3]].push(student[0]);
-        });
-        resolve(stats);
-      })
-      .catch(() => {
-        reject(new Error('Cannot load the database'));
-      });
+    readFile(filePath, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        const lines = data.toString().split('\n');
+        const noHeader = lines.slice(1);
+        for (let i = 0; i < noHeader.length; i += 1) {
+          if (noHeader[i]) {
+            const field = noHeader[i].toString().split(',');
+            if (Object.prototype.hasOwnProperty.call(students, field[3])) {
+              students[field[3]].push(field[0]);
+            } else {
+              students[field[3]] = [field[0]];
+            }
+          }
+        }
+        resolve(students);
+      }
+    });
   });
-}
-
-export default readDatabase;
+};
